@@ -16,13 +16,13 @@ Specifically using for recording my study steps of visual slam. 记录我自己�
   * 欧拉角   Eigen::Vector3d    `eular_angle = rotation_matrix.eularAngles(2,1,0)  // 将旋转矩阵直接转换成欧拉角,yaw-pitch-roll顺序` 
   * 四元数   Eigen::Quaternion  `q = Eigen::Quaternion(rotation_vector)            // 可以直接把AngleAxis赋值给四元数，也可以把旋转矩阵赋给它` 
   * 欧拉变换 Eigen::Isometry    `Twr = Eigen::Isometry::Identity()                 // 虽然称为3d，实质上是4＊4的矩阵` 
-                                `Twr.rotate(rotation_vector)                       // 按照rotation_vector进行旋转` \                           
+                                `Twr.rotate(rotation_vector)                       // 按照rotation_vector进行旋转`                           
                                 `Twr.pretranslate(Eigen::Vector3d(1,3,4))          // 把平移向量设成(1,3,4)`
                                
-* 知道了ifstream读取txt文件用法  `ifstream fin(trajectory_file)` \
+* 知道了ifstream读取txt文件用法  `ifstream fin(trajectory_file)` 
                                  `fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw`
                               
->学会了vector的用法
+* 学会了vector的用法
 
 BTW,不要在虚拟机里面make的时候用**多线程编译**，会变得不幸orz
 ![M3(}@I@URPA3 V{A7(8AQDG](https://user-images.githubusercontent.com/64240681/175765179-404a2b2c-d7a1-437b-b707-47ef742f653d.png)

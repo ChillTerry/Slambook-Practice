@@ -5,6 +5,8 @@ Specifically using for recording my study steps of visual slam. 记录我自己�
 
 深入了解了一下cmake，对CMakeLists.txt的编写有了更好的理解，以前做智能车用ROS的时候只知道去用`add_excutable`,`target_link_libaries`,并不知道静态库，共享库的含义
 
+![讯飞智能车](https://user-images.githubusercontent.com/64240681/176087403-f4675e18-f2bd-43e0-9143-8d69530c66d1.jpg)
+
 
 # ch3 2022/6/25
 
@@ -25,5 +27,15 @@ Specifically using for recording my study steps of visual slam. 记录我自己�
 * 学会了vector的用法
 
 BTW,不要在虚拟机里面make的时候用**多线程编译**，会变得不幸orz
+
 ![M3(}@I@URPA3 V{A7(8AQDG](https://user-images.githubusercontent.com/64240681/175765179-404a2b2c-d7a1-437b-b707-47ef742f653d.png)
+
+# ch4 2022/6/28
+
+上科大毕业典礼期间不让访问生进校，然后这几天在公寓疯狂追凡人修仙传，修仙真爽！顺便学完了第四章的李群李代数，算是对SO(3),SE(3)有了初步了解，这次是边看高博士视频边学的，感觉还不错，有人带确实会好一点，会讲一些书上没有的。弹幕里说ch4很难，我看下来通体感觉还行，说的我都能理解，而且指数映射，扰动模型推起来有种很爽的感觉。不知道学数学的会不会像修仙一样，就是那种全部推完和前面融汇贯通之后，有种念头通达，经脉疏通的感觉hhh。但是课后题的那两个证明我没推出来，唉，还是太菜。这次因为是看视频所以在纸上写的笔记，边看边写，看看情况后面能不能都用笔写，毕竟手撸一遍比打字会记得更好一点？
+![IMG_20220628_112250](https://user-images.githubusercontent.com/64240681/176085353-0172be17-4938-4016-a009-e7c43eb21ea3.jpg)
+
+![IMG_20220628_112300](https://user-images.githubusercontent.com/64240681/176085376-0450d8a8-b3d7-45f7-881c-ded9b50d2c69.jpg)
+
+![IMG_20220628_112155](https://user-images.githubusercontent.com/64240681/176085366-f16e4315-f12a-4d7d-80c2-65e5ea460f33.jpg)
 

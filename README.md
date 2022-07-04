@@ -25,20 +25,15 @@ Specifically using for recording my study steps of visual slam. 记录我自己�
   `Twr = Eigen::Isometry::Identity()                 // 虽然称为3d，实质上是4＊4的矩阵`   
   `Twr.rotate(rotation_vector)                       // 按照rotation_vector进行旋转`                             
   `Twr.pretranslate(Eigen::Vector3d(1,3,4))          // 把平移向量设成(1,3,4)`  
-                               
-* 知道了ifstream读取txt文件用法     
-`ifstream fin(trajectory_file)`   
-`fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw`  
                               
-* 学会了vector的用法
-
 BTW,不要在虚拟机里面make的时候用**多线程编译**，会变得不幸orz
 
 ![M3(}@I@URPA3 V{A7(8AQDG](https://user-images.githubusercontent.com/64240681/175765179-404a2b2c-d7a1-437b-b707-47ef742f653d.png)
 
 # ch4 2022/6/28
 
-上科大毕业典礼期间不让访问生进校，然后这几天在公寓疯狂追凡人修仙传，修仙真爽！顺便学完了第四章的李群李代数，算是对SO(3),SE(3)有了初步了解，这次是边看高博士视频边学的，感觉还不错，有人带确实会好一点，会讲一些书上没有的。指数映射，扰动模型推起来有种很爽的感觉，不知道学数学的会不会像修仙一样，就是那种全部推完和前面融汇贯通之后，有种念头通达，经脉疏通的感觉hhh。但是课后题的那两个证明我没推出来，唉，还是太菜了。这次因为是看视频所以在纸上写的笔记，边看边写，看看情况后面能不能都用笔写，毕竟手写一遍比打字会记得更牢固一点？
+上科大毕业典礼期间不让访问生进校，然后这几天在公寓疯狂追凡人修仙传，修仙真爽！顺便学完了第四章的李群李代数，算是对SO(3),SE(3)有了初步了解，这次是边看高博士视频边学的，感觉还不错，有人带确实会好一点，会讲一些书上没有的。指数映射，扰动模型推起来有种很爽的感觉，不知道学数学的会不会像修仙一样，就是那种全部推完和前面融汇贯通之后，有种念头通达，经脉疏通的感觉hhh。这次因为是看视频所以在纸上写的笔记，边看边写，看看情况后面能不能都用笔写，毕竟手写一遍比打字会记得更牢固一点？
+
 ![IMG_20220628_112250](https://user-images.githubusercontent.com/64240681/176085353-0172be17-4938-4016-a009-e7c43eb21ea3.jpg)
 
 ![IMG_20220628_112300](https://user-images.githubusercontent.com/64240681/176085376-0450d8a8-b3d7-45f7-881c-ded9b50d2c69.jpg)
@@ -49,6 +44,10 @@ Q: 扰动模型为什么是这么更新的？
 ![扰动模型更新](https://user-images.githubusercontent.com/64240681/176814857-ca364c2c-84cc-4720-9bbd-335664e2967c.png)
 
 # ch5 2022/6/30
+
+![IMG_20220704_102952](https://user-images.githubusercontent.com/64240681/177071301-54eff28d-d12a-4f2c-b8dd-896437102973.jpg)
+
+
 C++string类型的拼接确实比python麻烦许多，python可以直接两个string之间用+连接，而C++调用了boost库，mark一下这种写法的格式。
 
 >boost::format fmt("./%s/%d.%s"); //图像文件格式  
@@ -104,6 +103,77 @@ Q: 这两种链接方法有什么不同，为什么注释的那一种就编译�
 RGB-D将RGB彩图与深度图结合得到的点云图
 ![ch5-3](https://user-images.githubusercontent.com/64240681/176815074-a5525eed-97be-47da-a3b1-d44101f88312.png)
 
+# ch6 2022/7/4
+
+![IMG_20220704_102441](https://user-images.githubusercontent.com/64240681/177071120-7e3e43a4-6075-40ac-84e5-093e4172fd92.jpg)
+
+![IMG_20220704_102816](https://user-images.githubusercontent.com/64240681/177071357-a07159ec-8fed-4268-ab55-7d0f978776ef.jpg)
+
+Ceres算法大致流程：
+
+>// 代价函数的计算模型  
+struct CURVE_FITTING_COST {  
+  CURVE_FITTING_COST(double x, double y) : _x(x), _y(y) {}  
+  // 残差的计算  
+  template<typename T>  
+  bool operator()(  
+    const T *const abc, // 模型参数，有3维  
+    T *residual) const {  
+    residual[0] = T(_y) - ceres::exp(abc[0] * T(_x) * T(_x) + abc[1] * T(_x) + abc[2]); // y-exp(ax^2+bx+c)  
+    return true;
+  }    
+  const double _x, _y;    // x,y数据
+};
+> 
+>  // 构建最小二乘问题  
+  ceres::Problem problem;  
+  for (int i = 0; i < N; i++) {  
+    problem.AddResidualBlock(     // 向问题中添加误差项  
+      // 使用自动求导，模板参数：误差类型，输出维度，输入维度，维数要与前面struct中一致  
+      new       ceres::AutoDiffCostFunction<CURVE_FITTING_COST, 1, 3>(
+        new CURVE_FITTING_COST(x_data[i], y_data[i])
+      ),  
+      nullptr,            // 核函数，这里不使用，为空  
+      abc                 // 待估计参数  
+    );  
+  }
+
+G2O算法大致流程：
+
+>typedef g2o::BlockSolver< g2o::BlockSolverTraits<3,1> > Block;  // 每个误差项优化变量维度为3，误差值维度为1  
+// 第1步：创建一个线性求解器LinearSolver
+Block::LinearSolverType* linearSolver = new g2o::LinearSolverDense<Block::PoseMatrixType>();   
+// 第2步：创建BlockSolver。并用上面定义的线性求解器初始化
+Block* solver_ptr = new Block( linearSolver );        
+// 第3步：创建总求解器solver。并从GN, LM, DogLeg 中选一个，再用上述块求解器BlockSolver初始化
+g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg( solver_ptr );  
+// 第4步：创建终极大boss 稀疏优化器（SparseOptimizer）
+g2o::SparseOptimizer optimizer;     // 图模型
+optimizer.setAlgorithm( solver );   // 设置求解器
+optimizer.setVerbose( true );       // 打开调试输出  
+// 第5步：定义图的顶点和边。并添加到SparseOptimizer中
+CurveFittingVertex* v = new CurveFittingVertex(); //往图中增加顶点
+v->setEstimate( Eigen::Vector3d(0,0,0) );
+v->setId(0);
+optimizer.addVertex( v );
+for ( int i=0; i<N; i++ )    // 往图中增加边
+{
+  CurveFittingEdge* edge = new CurveFittingEdge( x_data[i] );
+  edge->setId(i);
+  edge->setVertex( 0, v );                // 设置连接的顶点
+  edge->setMeasurement( y_data[i] );      // 观测数值
+  edge->setInformation( Eigen::Matrix<double,1,1>::Identity()*1/(w_sigma*w_sigma) ); // 信息矩阵：协方差矩阵之逆
+  optimizer.addEdge( edge );
+}  
+// 第6步：设置优化参数，开始执行优化
+optimizer.initializeOptimization();
+optimizer.optimize(100);
+
+使用G2O时候报错了，我猜测有两种可能
+- CmakeLists那边没有编译出OptimizationAlgorithmGaussNewton这个函数的头文件
+- 这个函数语法写错了
+但是网上找了一圈没有发现正确的解决方案，所以暂时搁置了
+> g2oCurveFitting.cpp:(.text.startup+0x546)：对‘g2o::OptimizationAlgorithmGaussNewton::OptimizationAlgorithmGaussNewton(g2o::Solver*)’未定义的引用
 
 
 

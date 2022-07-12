@@ -73,7 +73,7 @@ for auto用法如下：
 只读range的元素时，使用for(const auto & x : range).
 
 Q: 为什么要用Eigen::aligned_allocator？  
->typedef vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>> TrajectoryType;  
+>typedef vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d> TrajectoryType;  
 
 **Answer**: 我们一般情况下定义容器的元素都是C++中的类型，所以可以省略，这是因为在C++11标准中，aligned_allocator管理C++中的各种数据类型的内存方法是一样的，可以不需要着重写出来。但是在Eigen管理内存和C++11中的方法是不一样的，所以需要单独强调元素的内存分配和管理。 
 
@@ -189,11 +189,101 @@ optimizer.initializeOptimization();
 optimizer.optimize(100); 
 ```
 
-使用G2O时候报错了，我猜测有两种可能  
-- CmakeLists那边没有编译出OptimizationAlgorithmGaussNewton这个函数的头文件
-- 这个函数语法写错了  
-但是网上找了一圈没有发现正确的解决方案，所以暂时搁置了  
+使用G2O时候报错了 
+
 > g2oCurveFitting.cpp:(.text.startup+0x546)：对‘g2o::OptimizationAlgorithmGaussNewton::OptimizationAlgorithmGaussNewton(g2o::Solver*)’未定义的引用
+
+我猜测有两种可能
+
+- CmakeLists那边没有编译找到OptimizationAlgorithmGaussNewton这个函数的头文件?
+- 这个函数语法写错?  
+
+但是网上找了一圈没有发现正确的解决方案，所以暂时搁置了  
+
+# ch7 2022/7/12
+特征点匹配的时候，图片1中的keypoint1可能会和图片2中的多个keypoint2对应，那么match.size应该是大于descriptor_1.rows的？
+```c++
+  //-- 第四步:匹配点对筛选
+  double min_dist = 10000, max_dist = 0;
+
+  //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
+  for (int i = 0; i < descriptors_1.rows; i++) {
+    double dist = match[i].distance;
+    if (dist < min_dist) min_dist = dist;
+    if (dist > max_dist) max_dist = dist;
+  }
+
+  printf("-- Max dist : %f \n", max_dist);
+  printf("-- Min dist : %f \n", min_dist);
+
+  //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
+  for (int i = 0; i < descriptors_1.rows; i++) {
+    if (match[i].distance <= max(2 * min_dist, 30.0)) {
+      matches.push_back(match[i]);
+    }
+  }
+```   
+
+三角测距的时候，代码里的T1和T2是什么？为什么和书里的计算公式不一样？
+```c++
+  Mat T1 = (Mat_<float>(3, 4) <<
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0);
+  Mat T2 = (Mat_<float>(3, 4) <<
+    R.at<double>(0, 0), R.at<double>(0, 1), R.at<double>(0, 2), t.at<double>(0, 0),
+    R.at<double>(1, 0), R.at<double>(1, 1), R.at<double>(1, 2), t.at<double>(1, 0),
+    R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2), t.at<double>(2, 0)
+  );
+```
+
+F不是由E再加上内参K得出的吗？那为什么计算E要带上相机光心，相机光心，而计算F不用？
+```c++
+    //-- 计算基础矩阵 F
+    Mat fundamental_matrix;
+    fundamental_matrix = findFundamentalMat(points1, points2, CV_FM_8POINT);
+    cout << "fundamental_matrix is " << endl << fundamental_matrix << endl;
+
+    //-- 计算本质矩阵 E
+    Point2d principal_point(325.1, 249.7);  //相机光心, TUM dataset标定值
+    double focal_length = 521;      //相机光心, TUM dataset标定值
+    Mat essential_matrix;
+    essential_matrix = findEssentialMat(points1, points2, focal_length, principal_point);
+    cout << "essential_matrix is " << endl << essential_matrix << endl;
+```
+
+d1, d2为什么要 / 5000.0? 最后push_back的时候为什么x, y要 * dd1, dd2?
+```c++
+    Mat img_1 = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+    Mat Img_2 = imread(argv[2], CV_LOAD_IMAGE_COLOR);
+
+    vector<KeyPoint> keypoints_1, keypoints_2;
+    vector<DMatch> matches;
+    find_feature_matches(img_1, img_2, keypoints_1, keypoints_2, matches);
+    cout << "一共找到了" << matches.size() << "组匹配点" << endl;
+
+    Mat depth_1 = imread(argv[3], CV_LOAD_IMAGE_UNCHANGED);
+    Mat depth_2 = imread(argv[4], CV_LOAD_IMAGE_UNCHANGED);
+    Mat K = (Mat_<double>(3, 3) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1);
+
+    vector<Point3f> pts1, pts2;
+
+    for (DMatch m:matches)
+    {
+        ushort d1 = depth_1.ptr<double>(int(keypoints_1[m.queryIdx].pt.y))[int(keypoints_1[m.queryIdx].pt.x)];
+        ushort d2 = depth_2.ptr<double>(int(keypoints_2[m.trainIdx].pt.y))[int(keypoints_2[m.trainIdx].pt.x)];
+        if (d1 == 0 || d2 == 0) continue;
+        float dd1 = float(d1) / 5000.0;
+        float dd2 = float(d2) / 5000.0;
+
+        Point2d p1 = pixel2cam(keypoints_1[m.queryIdx].pt, K);
+        Point2d p2 = pixel2cam(keypoints_2[m.trainIdx].pt, K);
+
+        pts1.push_back(Point3f(p1.x * dd1, p1.y * dd1, dd1));
+        pts2.push_back(Point3f(p2.x * dd2, p2.y * dd2, dd2));
+    }
+```
+
 
 
 

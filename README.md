@@ -3,7 +3,7 @@ Specifically using for recording my study steps of visual slam. 记录我自己�
 
 # ch2 2022/6/22
 
-深入了解了一下cmake，对CMakeLists.txt的编写有了更好的理解，以前做智能车用ROS的时候只知道去用`add_excutable`,`target_link_libaries`,并不知道静态库，共享库的含义
+以前做智能车用ROS的时候只知道去用`add_excutable`,`target_link_libaries`，这次深入了解了一下cmake，对CMakeLists.txt的编写有了更好的理解
 
 ![讯飞智能车](https://user-images.githubusercontent.com/64240681/176087403-f4675e18-f2bd-43e0-9143-8d69530c66d1.jpg)
 
@@ -201,6 +201,14 @@ optimizer.optimize(100);
 但是网上找了一圈没有发现正确的解决方案，所以暂时搁置了  
 
 # ch7 2022/7/12
+
+![IMG_20220712_201534](https://user-images.githubusercontent.com/64240681/178487697-8d14129e-c9d1-4faa-955d-569dac2fc129.jpg)
+
+![IMG_20220712_201631](https://user-images.githubusercontent.com/64240681/178487753-b2db1598-a857-4834-8537-5ba63ba69514.jpg)
+
+![IMG_20220712_201610](https://user-images.githubusercontent.com/64240681/178487782-45a96821-dba9-4c91-8c20-dd1474e5648b.jpg)
+
+
 特征点匹配的时候，图片1中的keypoint1可能会和图片2中的多个keypoint2对应，那么match.size应该是大于descriptor_1.rows的？
 ```c++
   //-- 第四步:匹配点对筛选

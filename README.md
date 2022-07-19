@@ -292,7 +292,37 @@ d1, d2为什么要 / 5000.0? 最后push_back的时候为什么x, y要 * dd1, dd2
     }
 ```
 
+# ch8 2022/7/19
 
+![IMG_20220719_111211](https://user-images.githubusercontent.com/64240681/179678455-4b851f1b-18f9-4395-b154-bead2a55bec4.jpg)
+
+
+不管是光流法还是直接法都有一步是做内插，为什么？
+```c++
+ /* get a gray scale value from reference image (bi-linear interpolated)*/
+inline float GetPixelValue(const cv::Mat &img, float x, float y) {
+    // boundary check
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x >= img.cols - 1) x = img.cols - 2;
+    if (y >= img.rows - 1) y = img.rows - 2;
+    
+    float xx = x - floor(x);
+    float yy = y - floor(y);
+    int x_a1 = std::min(img.cols - 1, int(x) + 1);
+    int y_a1 = std::min(img.rows - 1, int(y) + 1);
+    
+    return (1 - xx) * (1 - yy) * img.at<uchar>(y, x)
+    + xx * (1 - yy) * img.at<uchar>(y, x_a1)
+    + (1 - xx) * yy * img.at<uchar>(y_a1, x)
+    + xx * yy * img.at<uchar>(y_a1, x_a1);
+}
+
+opencv并行运算。
+‵‵`c++
+cv::parallel_for_(cv::Range(0, px_ref.size()),
+                  std::bind(&JacobianAccumulator::accumulate_jacobian, &jaco_accu, std::placeholders::_1));
+‵‵‵
 
 
 

@@ -43,6 +43,15 @@ BTW,不要在虚拟机里面make的时候用**多线程编译**，会变得不�
 Q: 扰动模型为什么是这么更新的？
 ![扰动模型更新](https://user-images.githubusercontent.com/64240681/176814857-ca364c2c-84cc-4720-9bbd-335664e2967c.png)
 
+Q: 课后第五题是怎么证明的？  
+![image](https://user-images.githubusercontent.com/64240681/231197858-1377bf9b-d9e9-4373-9316-61da5f08e5fd.png)
+
+Q: 旋转矩阵的约束使得它在非线性优化时很难优化，为什么不用四元数做优化?  
+**Answer:** 实际优化时用的就是四元数
+
+Q: 李代数求导对r求导，扰动模型对delta_r求导，扰动模型更方便计算，但是它的用处是什么？它能间接推出李代数求导对r求导吗？
+**Answer:** 不能，实际上对delta_r求导是对r求二次导，二次导的结果并不能间接推出一次导。但是对delta_r求导可以直接用到后面非线性优化，因为非线性优化是对delta_x求导，从而更新梯度下降的步长。
+
 # ch5 2022/6/30
 
 ![IMG_20220704_102952](https://user-images.githubusercontent.com/64240681/177071301-54eff28d-d12a-4f2c-b8dd-896437102973.jpg)
